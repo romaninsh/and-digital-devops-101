@@ -2,6 +2,8 @@
 resource "aws_route53_zone" "dns" {
   name = "aa.dekker-and.digital"
 
+
+
   tags = local.tags
 }
 
@@ -37,6 +39,6 @@ resource "aws_route53_record" "rec" {
 
   for_each = local.subdomains
 
-  name = "${each.key}.aa.dekker-and.digital"
+  name = "${each.key}.${var.subdomain}"
   records = each.value
 }

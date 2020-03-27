@@ -8,9 +8,8 @@ variable "subnets" {
 
 variable "vpc" {}
 
-resource "aws_ecs_cluster" "fargate" {
-  name = var.name
-}
+
+variable "cluster" {}
 
 
 module "app_container_definition" {
@@ -109,7 +108,7 @@ resource "aws_security_group" "main" {
 
 resource "aws_ecs_service" "main" {
   name            = var.name
-  cluster         = aws_ecs_cluster.fargate.id
+  cluster         = var.cluster
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 1
   launch_type     = "FARGATE"
@@ -122,12 +121,11 @@ resource "aws_ecs_service" "main" {
   }
 
 
-//  load_balancer {
-//    target_group_arn = aws_alb_target_group.main.arn
-//    container_name   = var.name
-//    container_port   = 80
-//  }
-//
+  load_balancer {
+    target_group_arn = aws_alb_target_group.main.arn
+    container_name   = var.name
+    container_port   = 80
+  }
 
 
 //  depends_on = [

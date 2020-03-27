@@ -9,6 +9,10 @@ variable "project" {
   default = "romans"
 }
 
+variable "subdomain" {
+  default = "aa.dekker-and.digital"
+}
+
 
 locals {
   tags = {
@@ -30,7 +34,28 @@ module "vpc" {
   #enable_vpn_gateway = true
 
   tags = local.tags
+
 }
+
+resource "aws_ecs_cluster" "fargate" {
+  name = var.project
+}
+
+module "app" {
+  source = "./app"
+
+  cluster = aws_ecs_cluster.fargate.id
+  vpc = module.vpc.vpc_id
+  subnets = module.vpc.private_subnets
+  public_subnets = module.vpc.public_subnets
+
+  name = "myapp"
+}
+
+
+  #vpc = module.vpc.vpc_id
+  #subnets = module.vpc.private_subnets
+
 
 resource "aws_ecr_repository" "ecr" {
   name = "ecr-${var.project}"

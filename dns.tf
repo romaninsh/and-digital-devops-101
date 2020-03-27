@@ -33,8 +33,14 @@ locals {
       "ns-1955.awsdns-52.co.uk",
       "ns-374.awsdns-46.com",
       "ns-928.awsdns-52.net",
-    ]
+    ],
     
+    "niko-uat" : [
+        "ns-580.awsdns-08.net",
+        "ns-1816.awsdns-35.co.uk",
+        "ns-1306.awsdns-35.org",
+        "ns-483.awsdns-60.com"
+    ]
     
   }
 }

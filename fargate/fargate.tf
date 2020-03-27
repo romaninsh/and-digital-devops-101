@@ -87,3 +87,52 @@ resource "aws_iam_role_policy_attachment" "main" {
   role = aws_iam_role.main.name
 }
 
+
+resource "aws_security_group" "main" {
+  name        = var.name
+  vpc_id      = var.vpc
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 80
+    to_port     = 80
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_ecs_service" "main" {
+  name            = var.name
+  cluster         = aws_ecs_cluster.fargate.id
+  task_definition = aws_ecs_task_definition.app.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+  #iam_role        = aws_iam_role.main.arn
+
+  network_configuration {
+    assign_public_ip = true
+    security_groups = [aws_security_group.main.id]
+    subnets         = var.subnets
+  }
+
+
+//  load_balancer {
+//    target_group_arn = aws_alb_target_group.main.arn
+//    container_name   = var.name
+//    container_port   = 80
+//  }
+//
+
+
+//  depends_on = [
+//    aws_alb_listener.main
+//  ]
+}
+
+

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "app",
+    "image": "tutum/hello-world",
+    "cpu": 512,
+    "memory": 512,
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 80
+      }
+    ]
+  }
+]

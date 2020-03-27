@@ -26,7 +26,16 @@ locals {
       "ns-1572.awsdns-04.co.uk",
       "ns-1481.awsdns-57.org",
       "ns-266.awsdns-33.com",
+    ],
+    
+    "uat-mohammad" : [
+      "ns-1206.awsdns-22.org",
+      "ns-1955.awsdns-52.co.uk",
+      "ns-374.awsdns-46.com",
+      "ns-928.awsdns-52.net",
     ]
+    
+    
   }
 }
 

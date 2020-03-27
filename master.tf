@@ -13,6 +13,11 @@ variable "subdomain" {
   default = "aa.dekker-and.digital"
 }
 
+variable "prod" {
+  type = bool
+  default = false
+}
+
 
 locals {
   tags = {
@@ -46,21 +51,22 @@ module "app" {
 
   cluster = aws_ecs_cluster.fargate.id
   vpc = module.vpc.vpc_id
-  subnets = module.vpc.private_subnets
+  #subnets = module.vpc.private_subnets
+  subnets = module.vpc.public_subnets
   public_subnets = module.vpc.public_subnets
+
+  rds_address = aws_db_instance.default.endpoint
+  rds_password = random_password.mysql-password.result
 
   name = "myapp"
 }
 
+output "AWS_ACCESS_KEY_ID" {
+  value = module.app.AWS_ACCESS_KEY_ID
+}
 
-  #vpc = module.vpc.vpc_id
-  #subnets = module.vpc.private_subnets
-
-
-resource "aws_ecr_repository" "ecr" {
-  name = "ecr-${var.project}"
-
-  tags = local.tags
+output "AWS_SECRET_ACCESS_KEY" {
+  value = module.app.AWS_SECRET_ACCESS_KEY
 }
 
 resource "random_password" "mysql-password" {

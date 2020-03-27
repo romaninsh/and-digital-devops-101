@@ -8,14 +8,17 @@ variable "subnets" {
 
 variable "vpc" {}
 
+variable "rds_address" {}
+variable "rds_password" {}
 
 variable "cluster" {}
 
+data "aws_region" "current" {}
 
 module "app_container_definition" {
   source = "git::https://github.com/cloudposse/terraform-aws-ecs-container-definition.git?ref=tags/0.21.0"
   container_name = var.name
-  container_image              = "tutum/hello-world"
+  container_image              = "${aws_ecr_repository.cf_repo.repository_url}:latest"
   container_cpu                = 512
   container_memory             = 1024
   essential                    = true
@@ -27,8 +30,30 @@ module "app_container_definition" {
       protocol                 = "tcp"
     }
   ]
+
+  environment                  = [
+
+    {name: "WORDPRESS_DB_HOST", value: "${var.rds_address}:3306"},
+    {name: "WORDPRESS_DB_USER", value: "root"},
+    {name: "WORDPRESS_DB_PASSWORD", value: var.rds_password},
+    {name: "WORDPRESS_DB_NAME", value: "terraform-20200218111324391700000003"},
+  ]
+
+  log_configuration = {
+
+    logDriver: "awslogs"
+    options: {
+      "awslogs-group": aws_cloudwatch_log_group.log.name,
+      "awslogs-region": data.aws_region.current.name
+      "awslogs-stream-prefix": var.name
+    }
+    secretOptions: []
+  }
 }
 
+resource "aws_cloudwatch_log_group" "log" {
+  name = var.name
+}
 
 resource "aws_ecs_task_definition" "app" {
   container_definitions = "[${module.app_container_definition.json_map}]"
@@ -110,7 +135,7 @@ resource "aws_ecs_service" "main" {
   name            = var.name
   cluster         = var.cluster
   task_definition = aws_ecs_task_definition.app.arn
-  desired_count   = 1
+  desired_count   = 2
   launch_type     = "FARGATE"
   #iam_role        = aws_iam_role.main.arn
 

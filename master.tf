@@ -9,6 +9,15 @@ variable "project" {
   default = "romans"
 }
 
+variable "subdomain" {
+  default = "aa.dekker-and.digital"
+}
+
+variable "prod" {
+  type = bool
+  default = false
+}
+
 
 locals {
   tags = {
@@ -30,12 +39,34 @@ module "vpc" {
   #enable_vpn_gateway = true
 
   tags = local.tags
+
 }
 
-resource "aws_ecr_repository" "ecr" {
-  name = "ecr-${var.project}"
+resource "aws_ecs_cluster" "fargate" {
+  name = var.project
+}
 
-  tags = local.tags
+module "app" {
+  source = "./app"
+
+  cluster = aws_ecs_cluster.fargate.id
+  vpc = module.vpc.vpc_id
+  #subnets = module.vpc.private_subnets
+  subnets = module.vpc.public_subnets
+  public_subnets = module.vpc.public_subnets
+
+  rds_address = aws_db_instance.default.endpoint
+  rds_password = random_password.mysql-password.result
+
+  name = "myapp"
+}
+
+output "AWS_ACCESS_KEY_ID" {
+  value = module.app.AWS_ACCESS_KEY_ID
+}
+
+output "AWS_SECRET_ACCESS_KEY" {
+  value = module.app.AWS_SECRET_ACCESS_KEY
 }
 
 resource "random_password" "mysql-password" {
